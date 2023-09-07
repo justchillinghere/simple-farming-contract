@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity =0.8.17;
+pragma solidity =0.8.18;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -57,7 +57,7 @@ contract Farming {
 
 	modifier farmingIsOver () {
 		require(users[msg.sender].depositTime > 0, "No time has elapsed since the deposit");
-		uint256 constant totalTerm = epochDuration * amountOfEpochs;
+		uint256 totalTerm = epochDuration * amountOfEpochs;
 		uint256 currentDuration = block.timestamp - users[msg.sender].depositTime;
 		require(currentDuration >= totalTerm, "Farming is not over yet");
 		_;
@@ -101,26 +101,23 @@ contract Farming {
         emit Deposited(msg.sender, _amount);
     }
 
-	function withdraw(uint256 _amountToWithdraw) userDeposited farmingIsOver public {
-		require(_amountToWithdraw > 0, "Invalid amount requested to withdraw");
-		require(users[msg.sender].stakedAmount >= _amountToWithdraw, "Requested amount to withdraw exceeds stacked one");
+	function withdraw() userDeposited farmingIsOver public {
 
-		users[msg.sender].stakedAmount -= _amountToWithdraw;
-		stakingToken.safeTransferFrom(address(this), msg.sender, _amountToWithdraw);
-		emit Withdraw(msg.sender, _amountToWithdraw);
+		uint256 amountToTransfer = users[msg.sender].stakedAmount;
+		users[msg.sender].stakedAmount = 0;
+		stakingToken.safeTransferFrom(address(this), msg.sender, amountToTransfer);
+		emit Withdraw(msg.sender, amountToTransfer);
 	}	
-
-	function withdrawAll() external {
-		withdraw(users[msg.sender].stakedAmount);
-	}
 
 	function claimRewards() userDeposited farmingIsOver external {
 		require(!users[msg.sender].claimed, "User already claimed");
 
-		uint256 rewardToTransfer = (users[msg.sender].stakedAmount \
-			* _percentage * _amountOfEpochs) / HUNDRED_PERCENT;
+		uint256 rewardToTransfer = (users[msg.sender].stakedAmount
+			* percentage 
+			* amountOfEpochs) 
+			/ HUNDRED_PERCENT;
 		
-		require(rewardToTransfer, "No reward to transfer");
+		require(rewardToTransfer > 0, "No reward to transfer");
 		
 		users[msg.sender].claimed = true;
 		users[msg.sender].depositTime = 0;
