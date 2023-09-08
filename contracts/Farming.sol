@@ -105,6 +105,8 @@ contract Farming {
 
 		uint256 amountToTransfer = users[msg.sender].stakedAmount;
 		users[msg.sender].stakedAmount = 0;
+
+		IERC20(stakingToken).approve(address(this), amountToTransfer);
 		stakingToken.safeTransferFrom(address(this), msg.sender, amountToTransfer);
 		emit Withdraw(msg.sender, amountToTransfer);
 	}	
@@ -121,6 +123,7 @@ contract Farming {
 		
 		users[msg.sender].claimed = true;
 		users[msg.sender].depositTime = 0;
+		IERC20(rewardToken).approve(address(this), rewardToTransfer);
 		rewardToken.safeTransferFrom(address(this), msg.sender, rewardToTransfer);
 		emit Claimed(msg.sender, rewardToTransfer);
 	}
