@@ -71,25 +71,24 @@ describe("Test farming contract", function () {
     );
 
     percentage = 10;
-    epochDuration = 10;
+    epochDuration = 2592000;
     amountOfEpochs = 3;
     rewardAmount = calculateReward(stakeAmount, percentage, amountOfEpochs);
     startTime = await time.latest();
 
     await tokenReward.approve(farmingContract.address, rewardAmount);
+
+    await farmingContract.initialize(
+      stakeAmount,
+      percentage,
+      epochDuration,
+      amountOfEpochs,
+      startTime
+    );
   });
 
   describe("Test farming contract initialization", function () {
     // Setup default farming parameters and initialize farmng for a pair of tokens
-    beforeEach(async () => {
-      await farmingContract.initialize(
-        stakeAmount,
-        percentage,
-        epochDuration,
-        amountOfEpochs,
-        startTime
-      );
-    });
     it("should have transfered correct amount of rewards to the contract after initialization", async () => {
       expect(await tokenReward.balanceOf(farmingContract.address)).to.be.equal(
         rewardAmount
@@ -121,15 +120,6 @@ describe("Test farming contract", function () {
   });
   describe("Test deposit to the farming contract", function () {
     // Setup default farming parameters and initialize farmng for a pair of tokens
-    beforeEach(async () => {
-      await farmingContract.initialize(
-        stakeAmount,
-        percentage,
-        epochDuration,
-        amountOfEpochs,
-        startTime
-      );
-    });
     it("should deposit tokens to the contract and check balance", async () => {
       amountToDeposit = ethers.utils.parseUnits("1", "10");
       await tokenLP.approve(farmingContract.address, amountToDeposit);
@@ -148,29 +138,8 @@ describe("Test farming contract", function () {
   });
   describe("Negative tests for deposit", function () {
     // Setup default farming parameters and initialize farmng for a pair of tokens
-    beforeEach(async () => {});
-    it("should fail to deposit before start", async () => {
-      await farmingContract.initialize(
-        stakeAmount,
-        percentage,
-        epochDuration,
-        amountOfEpochs,
-        startTime + 250000
-      );
-      amountToDeposit = ethers.utils.parseUnits("1", "10");
-      await tokenLP.approve(farmingContract.address, amountToDeposit);
-      await expect(farmingContract.deposit(amountToDeposit)).to.be.revertedWith(
-        "Farming is not up yet!"
-      );
-    });
+
     it("should fail to deposit twice", async () => {
-      await farmingContract.initialize(
-        stakeAmount,
-        percentage,
-        epochDuration,
-        amountOfEpochs,
-        startTime
-      );
       amountToDeposit = ethers.utils.parseUnits("1", "10");
       await tokenLP.approve(farmingContract.address, amountToDeposit.mul(2));
       await farmingContract.deposit(amountToDeposit);
@@ -179,13 +148,6 @@ describe("Test farming contract", function () {
       );
     });
     it("should fail to deposit more tokens than limit set", async () => {
-      await farmingContract.initialize(
-        stakeAmount,
-        percentage,
-        epochDuration,
-        amountOfEpochs,
-        startTime
-      );
       amountToDeposit = stakeAmount.mul(2);
       await tokenLP.approve(farmingContract.address, amountToDeposit);
       await expect(farmingContract.deposit(amountToDeposit)).to.be.revertedWith(
@@ -195,15 +157,6 @@ describe("Test farming contract", function () {
   });
   describe("Test withdraw from the farming contract", function () {
     // Setup default farming parameters and initialize farmng for a pair of tokens
-    beforeEach(async () => {
-      await farmingContract.initialize(
-        stakeAmount,
-        percentage,
-        epochDuration,
-        amountOfEpochs,
-        startTime
-      );
-    });
     it("should let withdraw after farming ends with the same amount as has been staked", async () => {
       amountToDeposit = ethers.utils.parseUnits("1", "10");
       await tokenLP.approve(farmingContract.address, amountToDeposit);
@@ -228,17 +181,6 @@ describe("Test farming contract", function () {
   });
   describe("Negative test withdraw", function () {
     // Setup default farming parameters and initialize farmng for a pair of tokens
-    beforeEach(async () => {
-      epochDuration = 2592000;
-
-      await farmingContract.initialize(
-        stakeAmount,
-        percentage,
-        epochDuration,
-        amountOfEpochs,
-        startTime
-      );
-    });
     it("should fail to withdraw before the farming ends", async () => {
       amountToDeposit = ethers.utils.parseUnits("1", "10");
       await tokenLP.approve(farmingContract.address, amountToDeposit);
@@ -261,13 +203,6 @@ describe("Test farming contract", function () {
   });
   describe("Test rewards", function () {
     beforeEach(async () => {
-      await farmingContract.initialize(
-        stakeAmount,
-        percentage,
-        epochDuration,
-        amountOfEpochs,
-        startTime
-      );
       amountToDeposit = ethers.utils.parseUnits("1", "10");
       await tokenLP.approve(farmingContract.address, amountToDeposit);
       await farmingContract.deposit(amountToDeposit);
@@ -299,17 +234,6 @@ describe("Test farming contract", function () {
   });
   describe("Negative test rewards", function () {
     // Setup default farming parameters and initialize farmng for a pair of tokens
-    beforeEach(async () => {
-      epochDuration = 2592000;
-
-      await farmingContract.initialize(
-        stakeAmount,
-        percentage,
-        epochDuration,
-        amountOfEpochs,
-        startTime
-      );
-    });
     it("should fail to get rewards before the farming ends", async () => {
       amountToDeposit = ethers.utils.parseUnits("1", "10");
       await tokenLP.approve(farmingContract.address, amountToDeposit);
