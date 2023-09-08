@@ -1,5 +1,5 @@
 import { ethers, run, network } from "hardhat";
-import uniswapV2Data from "../uniswapV2ContractsData.json";
+import { tokenData } from "../hardhat.config";
 
 const delay = async (time: number) => {
   return new Promise((resolve: any) => {
@@ -10,14 +10,17 @@ const delay = async (time: number) => {
 };
 
 async function main() {
-  const router = uniswapV2Data.router.address;
-  const factory = uniswapV2Data.factory.address;
-  const MyContract = await ethers.getContractFactory("LiquidityProvider");
-  const myContract = await MyContract.deploy(router, factory);
+  const MyContract = await ethers.getContractFactory("Farming");
+  const myContract = await MyContract.deploy(
+    tokenData.tokenLP.address,
+    tokenData.tokenReward.address
+  );
 
   await myContract.deployed();
 
-  console.log(`The contract has been deployed to ${myContract.address}`);
+  console.log(
+    `The farming contract has been deployed to ${myContract.address}`
+  );
 
   console.log("wait of delay...");
   await delay(30000); // delay 30 seconds
@@ -25,8 +28,11 @@ async function main() {
   try {
     await run("verify:verify", {
       address: myContract!.address,
-      contract: "contracts/LiquidityProvider.sol:LiquidityProvider",
-      constructorArguments: [router, factory],
+      contract: "contracts/Farming.sol:Farming",
+      constructorArguments: [
+        tokenData.tokenLP.address,
+        tokenData.tokenReward.address,
+      ],
     });
     console.log("verify success");
     return;

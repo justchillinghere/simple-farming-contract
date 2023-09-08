@@ -35,6 +35,25 @@ if (!contractAddress) {
   throw new Error("Please set your CONTRACT_ADDRESS in a .env file");
 }
 
+export const tokenData: {
+  [key: string]: {
+    name: string;
+    symbol: string;
+    address: string;
+  };
+} = {
+  tokenLP: {
+    name: "tokenLP",
+    symbol: "TLP",
+    address: "0x09181a11d0Bf13ef860A7BAed7Ee593298128701",
+  },
+  tokenReward: {
+    name: "tokenReward",
+    symbol: "TRD",
+    address: "0x8cCce79D6653B94bfb14B49A398FD493988717A5",
+  },
+};
+
 const chainIds = {
   "arbitrum-mainnet": 42161,
   avalanche: 43114,
