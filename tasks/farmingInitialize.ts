@@ -1,6 +1,8 @@
 import { task } from "hardhat/config";
+import { ethers } from "ethers";
 import { BigNumber, ContractTransaction, ContractReceipt } from "ethers";
 import { contractAddress } from "../hardhat.config";
+import { time } from "@nomicfoundation/hardhat-network-helpers";
 
 /*
  *
@@ -13,9 +15,16 @@ import { contractAddress } from "../hardhat.config";
  * 4. uint256 _amountOfEpochs – amount of epochs
  * 5. _startTime – in seconds from 1 January 1970. Better to use timestamps
  */
+async function getLastBlockTimestamp(): Promise<BigNumber> {
+  const provider = ethers.providers.getDefaultProvider();
+  const blockNumber: number = await provider.getBlockNumber();
+  const block: any = await provider.getBlock(blockNumber);
+  const timestamp: BigNumber = block.timestamp;
+  return timestamp;
+}
 
 task(
-  "initialize farming contract",
+  "initialize",
   "Initializes the farming contract for the pair of token. \
   Transfers reward tokens to the farming contract"
 )
@@ -23,10 +32,7 @@ task(
   .addParam("percentage", "Percentage for the staking (for the one epoch)")
   .addParam("epochDuration", "Duration of one epoch (in seconds)")
   .addParam("amountOfEpochs", "Amount of epochs")
-  .addParam(
-    "startTime",
-    "In seconds from 1 January 1970. Better to use timestamps relative to blocks"
-  )
+  .addParam("startTime", "In seconds from the last block time")
   .setAction(
     async (
       { totalAmount, percentage, epochDuration, amountOfEpochs, startTime },
@@ -34,14 +40,16 @@ task(
     ) => {
       const Contract = await ethers.getContractFactory("Farming");
       const farmingContract = Contract.attach(contractAddress!);
-
+      const timeToStart = (await getLastBlockTimestamp()).add(startTime);
+      console.log("Started initialization");
       const farmingTx: ContractTransaction = await farmingContract.initialize(
         totalAmount,
         percentage,
         epochDuration,
         amountOfEpochs,
-        startTime
+        timeToStart
       );
+      console.log("Started waiting");
       const farmingReceipt: ContractReceipt = await farmingTx.wait();
       console.log("Initialized farming parameters");
     }

@@ -4,7 +4,7 @@ import { contractAddress } from "../hardhat.config";
 import { Address } from "cluster";
 
 task(
-  "Claim the farming reward",
+  "claim",
   "Transfers the reward to the holder and emits an event"
 ).setAction(async ({ ethers }) => {
   const Contract = await ethers.getContractFactory("Farming");

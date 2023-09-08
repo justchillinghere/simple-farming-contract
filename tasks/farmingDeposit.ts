@@ -1,21 +1,31 @@
 import { task } from "hardhat/config";
 import { BigNumber, ContractTransaction, ContractReceipt } from "ethers";
+import { ethers } from "ethers";
 import { contractAddress } from "../hardhat.config";
 import { Address } from "cluster";
 
+async function getLastBlockTimestamp(): Promise<BigNumber> {
+  const provider = ethers.providers.getDefaultProvider();
+  const blockNumber: number = await provider.getBlockNumber();
+  const block: any = await provider.getBlock(blockNumber);
+  const timestamp: BigNumber = block.timestamp;
+  return timestamp;
+}
+
 task(
-  "Make deposit to the farming contract",
+  "deposit",
   "Makes deposit to the farming contract \
    and transfers LP tokens to the contract for staking. \
    Emits event after successful deposit"
 )
-  .addParam("depost", "Amount of tokens to stake")
-  .setAction(async ({ deposit }, { ethers }) => {
+  .addParam("depositAmount", "Amount of tokens to stake")
+  .setAction(async ({ depositAmount }, { ethers }) => {
     const Contract = await ethers.getContractFactory("Farming");
     const farmingContract = Contract.attach(contractAddress!);
+    console.log(await getLastBlockTimestamp());
 
     const farmingTx: ContractTransaction = await farmingContract.deposit(
-      deposit
+      depositAmount
     );
     const farmingReceipt: ContractReceipt = await farmingTx.wait();
 
@@ -28,3 +38,6 @@ task(
     console.log(`Address of the holder: ${addr}`);
     console.log(`Deposited amount: ${amount}`);
   });
+
+1694177675;
+16941766790;

@@ -4,7 +4,7 @@ import { contractAddress } from "../hardhat.config";
 import { Address } from "cluster";
 
 task(
-  "Withdraw deposit after the farming ends",
+  "withdraw",
   "Withdraws all the money staked back to the owner. Emits an event"
 ).setAction(async ({ ethers }) => {
   const Contract = await ethers.getContractFactory("Farming");

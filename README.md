@@ -1,30 +1,20 @@
 # Simple farming implementation
 
-## Задача:
-
-- Максимальная продолжительность: 3 месяца (farming)
-- Токен для пополнения счета: LP-токен
-- Максимальная общая сумма для ставки: 1000 LP-токенов
-- Процент ставки: 10% в месяц
-- Токен для вознаграждения: ERC20
-
-## Задание:
-
-- Дописать функции `withdraw` и `claimRewards`;
-- Написать test, task, scripts. При написании test нужно форкунить mainnet и проверить LP токены
-- Переделать `hardhat.config.ts`
-- Задеплоить в `mumbai` 2 erc20, 1 farming contract. Не обязательно создавать LP токен в `mumbai` можно создать 1 reward token и 1 staking token.
-- Верифицировать контракты
-
 ## Description
 
-This project is dedicated to learn interaction with other smart contracts from another smart contract.
+The project is a simple farming implementation using a smart contract called Farming.sol. The smart contract allows users to stake LP tokens for a specified period of time and earn rewards in ERC20 tokens.
 
-With this contract one can add liquidity to the Uniswap V2 decentralized exchange by providing some amounts of two tokens. This smart contract allows users to add liquidity to any pair of ERC20 tokens (or creates new one automatically) on the Uniswap V2 platform. The contract transfers the desired amounts of tokens from the sender to itself, approves the Uniswap V2 Router to spend the tokens, and then calls the addLiquidity function of the Router to add liquidity to the specified token pair. The contract emits an event with the details of the liquidity added.
+Here are the main features of the smart contract:
+
+- Users can deposit LP tokens into the contract by calling the deposit function. The deposit amount cannot exceed the remaining tokens available for staking.
+- The contract owner can initialize the farming by calling the initialize function. This sets the total amount of LP tokens available for staking, the percentage of rewards to be distributed, the duration of each epoch, the number of epochs, and the start time of the farming.
+- Once the farming is initialized and the start time is reached, users can deposit LP tokens and start earning rewards.
+- After the farming period is over, users can withdraw their staked LP tokens and claim their earned rewards by calling the withdraw and claimRewards functions respectively.
+- The smart contract keeps track of each user's staked amount, deposit time, and whether they have already claimed their rewards.
 
 ## Deployed contract example
 
-You can find and test my deployed contract in goerli testnet by this address: [0xa3073345541e46944Cb55d565B08555AB76DB990](https://goerli.etherscan.io/address/0xa3073345541e46944Cb55d565B08555AB76DB990)
+You can find and test my deployed contract in goerli testnet by this address: [0x6218dF7417644b6c2Fe897c6119Bd7A220a3361B](https://goerli.etherscan.io/address/0x6218dF7417644b6c2Fe897c6119Bd7A220a3361B)
 
 ## Installation
 
@@ -47,7 +37,7 @@ Note:
 Deploy contract to the chain (mumbai testnet):
 
 ```
-npx hardhat run scripts/deploy.ts --network polygon-mumbai
+npx hardhat run scripts/deploy.ts --network goerli (or polygon-mumbai)
 ```
 
 ## Tasks
