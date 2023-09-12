@@ -4,14 +4,6 @@ import { ethers } from "ethers";
 import { contractAddress } from "../hardhat.config";
 import { Address } from "cluster";
 
-async function getLastBlockTimestamp(): Promise<BigNumber> {
-  const provider = ethers.providers.getDefaultProvider();
-  const blockNumber: number = await provider.getBlockNumber();
-  const block: any = await provider.getBlock(blockNumber);
-  const timestamp: BigNumber = block.timestamp;
-  return timestamp;
-}
-
 task(
   "deposit",
   "Makes deposit to the farming contract \
@@ -22,11 +14,9 @@ task(
   .setAction(async ({ depositAmount }, { ethers }) => {
     const Contract = await ethers.getContractFactory("Farming");
     const farmingContract = Contract.attach(contractAddress!);
-    console.log(await getLastBlockTimestamp());
 
-    const farmingTx: ContractTransaction = await farmingContract.deposit(
-      depositAmount
-    );
+    const farmingTx: ContractTransaction =
+      await farmingContract.deposit(depositAmount);
     const farmingReceipt: ContractReceipt = await farmingTx.wait();
 
     const event = farmingReceipt.events?.find(

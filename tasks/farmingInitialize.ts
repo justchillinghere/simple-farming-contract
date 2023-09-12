@@ -2,7 +2,7 @@ import { task } from "hardhat/config";
 import { ethers } from "ethers";
 import { BigNumber, ContractTransaction, ContractReceipt } from "ethers";
 import { contractAddress } from "../hardhat.config";
-import { time } from "@nomicfoundation/hardhat-network-helpers";
+import { types } from "hardhat/config";
 
 /*
  *
@@ -15,11 +15,11 @@ import { time } from "@nomicfoundation/hardhat-network-helpers";
  * 4. uint256 _amountOfEpochs – amount of epochs
  * 5. _startTime – in seconds from 1 January 1970. Better to use timestamps
  */
-async function getLastBlockTimestamp(): Promise<BigNumber> {
+async function getLastBlockTimestamp(): Promise<number> {
   const provider = ethers.providers.getDefaultProvider();
   const blockNumber: number = await provider.getBlockNumber();
   const block: any = await provider.getBlock(blockNumber);
-  const timestamp: BigNumber = block.timestamp;
+  const timestamp: number = block.timestamp;
   return timestamp;
 }
 
@@ -32,7 +32,7 @@ task(
   .addParam("percentage", "Percentage for the staking (for the one epoch)")
   .addParam("epochDuration", "Duration of one epoch (in seconds)")
   .addParam("amountOfEpochs", "Amount of epochs")
-  .addParam("startTime", "In seconds from the last block time")
+  .addParam("startTime", "In seconds from the last block time", 0, types.int)
   .setAction(
     async (
       { totalAmount, percentage, epochDuration, amountOfEpochs, startTime },
@@ -40,7 +40,7 @@ task(
     ) => {
       const Contract = await ethers.getContractFactory("Farming");
       const farmingContract = Contract.attach(contractAddress!);
-      const timeToStart = (await getLastBlockTimestamp()).add(startTime);
+      const timeToStart = (await getLastBlockTimestamp()) + startTime;
       console.log("Started initialization");
       const farmingTx: ContractTransaction = await farmingContract.initialize(
         totalAmount,
