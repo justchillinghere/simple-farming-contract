@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
  * @title Farming
- * @dev A contract for staking and farming tokens. 
+ * @dev A contract for staking and farming tokens.
  * Takes a staking token and a reward token in the constructor.
  *
  * @notice This contract allows users to deposit tokens
@@ -16,7 +16,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
  * Withdrawal and rewards can be claimed by the user
  * only after the staking period has ended.
  * The user must claim rewards before withdrawing.
- * 
+ *
  */
 contract Farming {
     using SafeERC20 for IERC20Metadata;
@@ -47,7 +47,7 @@ contract Farming {
 
     bool public initialized;
 
-    mapping (address => User) public users;
+    mapping(address => User) public users;
 
     /**
      * @dev Emitted when a user deposits tokens into the farming contract.
@@ -69,7 +69,6 @@ contract Farming {
      * @param amount The amount of rewards claimed.
      */
     event Claimed(address indexed addr, uint256 amount);
-	
 
     constructor(address _stakingToken, address _rewardToken) {
         owner = msg.sender;
@@ -82,20 +81,20 @@ contract Farming {
         _;
     }
 
-	/**
-	 * @dev Initializes the farming contract with the specified parameters.
-	 * The reward tokens will be transfered from the owner to the contract 
-	 * in the amount of the full reward with percentage.
-	 * @param _totalAmount The total amount of tokens to be distributed as rewards.
-	 * @param _percentage The percentage of rewards to be distributed per epoch.
-	 * @param _epochDuration The duration of each epoch in seconds.
-	 * @param _amountOfEpochs The total number of epochs.
-	 * @param _startTime The start time of the farming period.
-	 * 
-	 * Requirements:
-	 * - The contract must not have been initialized before.
-	 *
-	 */
+    /**
+     * @dev Initializes the farming contract with the specified parameters.
+     * The reward tokens will be transfered from the owner to the contract
+     * in the amount of the full reward with percentage.
+     * @param _totalAmount The total amount of tokens to be distributed as rewards.
+     * @param _percentage The percentage of rewards to be distributed per epoch.
+     * @param _epochDuration The duration of each epoch in seconds.
+     * @param _amountOfEpochs The total number of epochs.
+     * @param _startTime The start time of the farming period.
+     *
+     * Requirements:
+     * - The contract must not have been initialized before.
+     *
+     */
     function initialize(
         uint256 _totalAmount,
         uint256 _percentage, // 0 ~ 100.00% => 0 ~ 10000
@@ -132,7 +131,10 @@ contract Farming {
     function deposit(uint256 _amount) external {
         require(startTime <= block.timestamp, "Farming is not up yet!");
         require(_amount <= tokensLeft, "Too many tokens contributed");
-        require(users[msg.sender].stakedAmount == 0, "User can deposit only once");
+        require(
+            users[msg.sender].stakedAmount == 0,
+            "User can deposit only once"
+        );
 
         users[msg.sender] = User({
             stakedAmount: _amount,
@@ -141,7 +143,7 @@ contract Farming {
         });
 
         tokensLeft -= _amount;
-        stakingToken.safeTransfer(address(this), _amount);
+        stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
         emit Deposited(msg.sender, _amount);
     }
 
@@ -153,14 +155,14 @@ contract Farming {
      * Requirements:
      * - The user must have already claimed their rewards.
      */
-	function withdraw() public {
-		require(users[msg.sender].claimed, "Please claim before withdrawing");
-		uint256 amountToTransfer = users[msg.sender].stakedAmount;
-		users[msg.sender].stakedAmount = 0;
-		users[msg.sender].depositTime = 0;
-		stakingToken.safeTransfer(msg.sender, amountToTransfer);
-		emit Withdraw(msg.sender, amountToTransfer);
-	}	
+    function withdraw() public {
+        require(users[msg.sender].claimed, "Please claim before withdrawing");
+        uint256 amountToTransfer = users[msg.sender].stakedAmount;
+        users[msg.sender].stakedAmount = 0;
+        users[msg.sender].depositTime = 0;
+        stakingToken.safeTransfer(msg.sender, amountToTransfer);
+        emit Withdraw(msg.sender, amountToTransfer);
+    }
 
     /**
      * @dev Claims rewards from the farming contract.
@@ -171,21 +173,23 @@ contract Farming {
      * - The user must have staked tokens.
      * - The staking period must have ended.
      * - The user must not have already claimed their rewards.
-     */	
-	function claimRewards() external {
-		require(users[msg.sender].stakedAmount > 0, "No token has been deposited by the account");
-		require(users[msg.sender].depositTime + epochDuration * amountOfEpochs <=
-		 block.timestamp, "Farming is not over yet");
-		require(!users[msg.sender].claimed, "User already claimed");
+     */
+    function claimRewards() external {
+        require(users[msg.sender].stakedAmount > 0,
+        	"No token has been deposited by the account"
+        );
+        require(users[msg.sender].depositTime + epochDuration * amountOfEpochs
+			<= block.timestamp,
+        	"Farming is not over yet"
+        );
+        require(!users[msg.sender].claimed, "User already claimed");
 
-		uint256 rewardToTransfer = (users[msg.sender].stakedAmount
-			* percentage 
-			* amountOfEpochs) 
-			/ HUNDRED_PERCENT;
-		
-		users[msg.sender].claimed = true;
-		rewardToken.safeTransfer(msg.sender, rewardToTransfer);
-		emit Claimed(msg.sender, rewardToTransfer);
-	}
+        uint256 rewardToTransfer = (users[msg.sender].stakedAmount *
+            percentage *
+            amountOfEpochs) / HUNDRED_PERCENT;
 
+        users[msg.sender].claimed = true;
+        rewardToken.safeTransfer(msg.sender, rewardToTransfer);
+        emit Claimed(msg.sender, rewardToTransfer);
+    }
 }

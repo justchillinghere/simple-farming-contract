@@ -12,20 +12,20 @@ interface IFarming {
         bool claimed;
     }
 
-	/**
-	 * @dev Initializes the farming contract with the specified parameters.
-	 * The reward tokens will be transfered from the owner to the contract 
-	 * in the amount of the full reward with percentage.
-	 * @param _totalAmount The total amount of tokens to be distributed as rewards.
-	 * @param _percentage The percentage of rewards to be distributed per epoch.
-	 * @param _epochDuration The duration of each epoch in seconds.
-	 * @param _amountOfEpochs The total number of epochs.
-	 * @param _startTime The start time of the farming period.
-	 * 
-	 * Requirements:
-	 * - The contract must not have been initialized before.
-	 *
-	 */
+    /**
+     * @dev Initializes the farming contract with the specified parameters.
+     * The reward tokens will be transfered from the owner to the contract
+     * in the amount of the full reward with percentage.
+     * @param _totalAmount The total amount of tokens to be distributed as rewards.
+     * @param _percentage The percentage of rewards to be distributed per epoch.
+     * @param _epochDuration The duration of each epoch in seconds.
+     * @param _amountOfEpochs The total number of epochs.
+     * @param _startTime The start time of the farming period.
+     *
+     * Requirements:
+     * - The contract must not have been initialized before.
+     *
+     */
     function initialize(
         uint256 _totalAmount,
         uint256 _percentage,
@@ -50,7 +50,7 @@ interface IFarming {
      *
      * Requirements:
      * - The user must have already claimed their rewards.
-	 * - The staking period must have ended.
+     * - The staking period must have ended.
      */
     function withdraw() external;
 
@@ -63,6 +63,6 @@ interface IFarming {
      * - The user must have staked tokens.
      * - The staking period must have ended.
      * - The user must not have already claimed their rewards.
-     */	
+     */
     function claimRewards() external;
 }

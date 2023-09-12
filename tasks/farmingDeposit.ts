@@ -38,6 +38,3 @@ task(
     console.log(`Address of the holder: ${addr}`);
     console.log(`Deposited amount: ${amount}`);
   });
-
-1694177675;
-16941766790;

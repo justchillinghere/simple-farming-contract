@@ -16,7 +16,7 @@ contract MyToken is ERC20, Ownable {
     /**
      * @dev Mints new tokens and assigns them to the specified address.
      * Can only be called by the contract owner.
-     * 
+     *
      * @param to The address to which the new tokens will be assigned.
      * @param amount The amount of tokens to mint.
      */

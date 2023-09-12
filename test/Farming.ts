@@ -157,47 +157,25 @@ describe("Test farming contract", function () {
   });
   describe("Test withdraw from the farming contract", function () {
     // Setup default farming parameters and initialize farmng for a pair of tokens
-    it("should let withdraw after farming ends with the same amount as has been staked", async () => {
+    it("should let withdraw after claiming rewards", async () => {
       amountToDeposit = ethers.utils.parseUnits("1", "10");
       await tokenLP.approve(farmingContract.address, amountToDeposit);
       await farmingContract.deposit(amountToDeposit);
       let balanceAfterDeposit = await tokenLP.balanceOf(owner.address);
 
       await time.increase(epochDuration * (amountOfEpochs + 1));
+      await farmingContract.claimRewards();
       await farmingContract.withdraw();
       expect(await tokenLP.balanceOf(owner.address)).to.be.equal(
         balanceAfterDeposit.add(amountToDeposit)
       );
     });
-    it("should let withdraw after farming ends and emit an event", async () => {
-      amountToDeposit = ethers.utils.parseUnits("1", "10");
-      await tokenLP.approve(farmingContract.address, amountToDeposit);
-      await farmingContract.deposit(amountToDeposit);
-      await time.increase(epochDuration * (amountOfEpochs + 1));
-      expect(await farmingContract.withdraw())
-        .to.emit(farmingContract, "Withdraw")
-        .withArgs(owner.address, amountToDeposit);
-    });
   });
   describe("Negative test withdraw", function () {
     // Setup default farming parameters and initialize farmng for a pair of tokens
-    it("should fail to withdraw before the farming ends", async () => {
-      amountToDeposit = ethers.utils.parseUnits("1", "10");
-      await tokenLP.approve(farmingContract.address, amountToDeposit);
-      await farmingContract.deposit(amountToDeposit);
-      await time.increase(epochDuration);
+    it("should fail to withdraw before claiming rewards", async () => {
       await expect(farmingContract.withdraw()).to.be.revertedWith(
-        "Farming is not over yet"
-      );
-    });
-    it("should fail to withdraw for not a holder", async () => {
-      amountToDeposit = ethers.utils.parseUnits("1", "10");
-      await tokenLP.approve(farmingContract.address, amountToDeposit);
-      await farmingContract.deposit(amountToDeposit);
-      await time.increase(epochDuration * (amountOfEpochs + 1));
-      const user1FarmingContract = farmingContract.connect(user1);
-      await expect(user1FarmingContract.withdraw()).to.be.revertedWith(
-        "No token has been deposited by the account"
+        "Please claim before withdrawing"
       );
     });
   });
@@ -243,7 +221,7 @@ describe("Test farming contract", function () {
         "Farming is not over yet"
       );
     });
-    it("should fail to withdraw for not a holder", async () => {
+    it("should fail to claim rewards for not a holder", async () => {
       amountToDeposit = ethers.utils.parseUnits("1", "10");
       await tokenLP.approve(farmingContract.address, amountToDeposit);
       await farmingContract.deposit(amountToDeposit);
@@ -253,5 +231,15 @@ describe("Test farming contract", function () {
         "No token has been deposited by the account"
       );
     });
+	it("should fail to claim more than once", async () => {
+		amountToDeposit = ethers.utils.parseUnits("1", "10");
+		await tokenLP.approve(farmingContract.address, amountToDeposit);
+		await farmingContract.deposit(amountToDeposit);
+		await time.increase(epochDuration * (amountOfEpochs + 1));
+		farmingContract.claimRewards();
+		await expect(farmingContract.claimRewards()).to.be.revertedWith(
+		  "User already claimed"
+		);
+	  });
   });
 });
